@@ -1,7 +1,8 @@
 {
     "appKeys": {},
     "capabilities": [
-        "location"
+        "location",
+        "configurable"
     ],
     "companyName": "Alex Lindeman",
     "longName": "WMATA With You",
@@ -29,6 +30,12 @@
                 "type": "font"
             },
             {
+                "file": "images/metro.png",
+                "menuIcon": true,
+                "name": "IMAGES_METRO_PNG",
+                "type": "png"
+            },
+            {
                 "file": "images/yl.png",
                 "name": "IMAGES_YL_PNG",
                 "type": "png"
@@ -46,12 +53,6 @@
             {
                 "file": "images/or.png",
                 "name": "IMAGES_OR_PNG",
-                "type": "png"
-            },
-            {
-                "file": "images/metro.png",
-                "menuIcon": true,
-                "name": "IMAGES_METRO_PNG",
                 "type": "png"
             },
             {

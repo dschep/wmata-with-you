@@ -6,11 +6,24 @@
 
 var UI = require('ui');
 var Ajax = require('ajax');
+var Settings = require('settings');
 
 var wmata_api_key = 'tdzzks35mmn4qxjg9mxp324v';
 var wmata_stations_url = 'http://api.wmata.com/Rail.svc/json/JStations';
 var wmata_trains_url = 'http://api.wmata.com/StationPrediction.svc/json/GetPrediction/';
 var wmata_incidents_url = 'http://api.wmata.com/Incidents.svc/json/Incidents';
+
+var user_stations = [];
+
+Settings.config ({
+	url: 'http://ael.me/wwy-pebble-config/config.html'
+}, function (e) {
+	Settings.option('stations', user_stations);
+	Settings.option('api_key', wmata_api_key);
+}, function (e) {
+	user_stations = e.options.stations;
+	wmata_api_key = e.options.api_key;
+});
 
 /*
  * Un-abbreviates train arrival times (`time`), and adds a "minute(s)" suffix.
@@ -113,7 +126,7 @@ function load_closest_station (position)
 
 /*
  * Loads the list of rail lines into a menu.
- */
+
 function load_lines()
 {
 	console.log('Showing all lines');
@@ -136,10 +149,40 @@ function load_lines()
 		load_stations(e.item.line);
 	});
 }
+ */
+
+/*
+ * Loads a list of stations as defined by the user in the Settings page.
+ */
+function load_user_stations()
+{
+	var stations = user_stations;
+	
+	if (stations.length > 0) // check that the user has set their favorite stations
+	{
+		var stations_list = new UI.Menu({ sections: [{ title: 'Favorite stations', items: [{ title: 'Loading...'}] }] });
+		for (var s in stations)
+		{
+			stations_list.item(0, s, { title: stations[s].Name });
+		}
+		stations_list.show();
+		stations_list.on('select', function (e) {
+			load_trains(stations[e.itemIndex]);
+		});
+	}
+	else // user has no favorite stations
+	{
+		var card = new UI.Card({
+			title: 'No stations',
+			body: 'Select your most frequently used stations using the settings page inside the Pebble app on your phone.',
+			scrollable: true
+		});
+		card.show();
+	}
+}
 
 /*
  * Loads the stations on `line` into a menu.
- */
 function load_stations (line)
 {
 	console.log('Showing stations on ' + tr_line(line));
@@ -183,6 +226,7 @@ function load_stations (line)
 		card.show();
 	});
 }
+ */
 
 /*
  * Loads trains passing through `station` into a menu.
@@ -244,7 +288,7 @@ function load_trains(station)
 function load_incidents()
 {
 	var card = new UI.Card({
-		title: 'Incidents',
+		title: 'Advisories',
 		body: 'Loading...',
 		scrollable: true
 	});
@@ -264,7 +308,7 @@ function load_incidents()
 		}
 		else
 		{
-			card.body('There are no incidents.');
+			card.body('There are no advisories.');
 		}
 		card.show();
 	}, function (error) {
@@ -287,6 +331,8 @@ function load_about()
 	about_card.show();
 }
 
+navigator.geolocation.getCurrentPosition(null);
+
 /*
  * Main body
  */
@@ -296,10 +342,10 @@ var main = new UI.Menu({
 			title: 'Closest station',
 			icon: 'images/location.png'
 		}, {
-			title: 'Pick a station',
+			title: 'Your stations',
 			icon: 'images/metro.png'
 		}, {
-			title: 'Incidents',
+			title: 'Advisories',
 			icon: 'images/incidents.png'
 		}, {
 			title: 'About',
@@ -315,7 +361,7 @@ main.on('select', function (e) {
 			determine_location();
 			break;
 		case 1:
-			load_lines();
+			load_user_stations();
 			break;
 		case 2:
 			load_incidents();
